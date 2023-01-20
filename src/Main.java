@@ -22,7 +22,7 @@ public class Main {
 
 // --------------- Map Part ------------------ //
 
-    public class Map{
+    public static class Map{
         byte height;
         byte width;
         Tile[][] map;
