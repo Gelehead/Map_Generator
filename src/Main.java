@@ -1,4 +1,5 @@
-
+import java.util.Random;
+import java.util.random.*;
 // Oscar Lavolet - 20242868
 
 
@@ -25,10 +26,12 @@ public class Main {
     public static class Map{
         byte height;
         byte width;
+        byte nbOfRivers;
         Tile[][] map;
         public Map(byte height, byte width){
             this.height = height;
             this.width = width;
+            this.nbOfRivers = 0;
             this.map = introMap((byte) 1, this.height, this.width);
         }
 
@@ -67,6 +70,12 @@ public class Main {
             System.out.println("  " + "· ".repeat(width+(adjust/2)) + " ");
         }
 
+        //Add rivers ( add fct to add terrain later )
+        public static void addRiver(byte lengthOfRiver){
+            Random rand = new Random();
+            rand.nextInt(height)
+        }
+
         // ---------- Array part ------------ (map)
 
         public static Tile[][] createArray(byte height, byte width){
@@ -82,7 +91,7 @@ public class Main {
         public static class Tile {
             byte posx; 
             byte posy;
-            // state is supposed to contain an ennemy, terrain, traps, nothing(null)
+            // state is supposed to contain an ennemy / terrain / traps / nothing(null)
             Object state;
             Object nextState;
 
