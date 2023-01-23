@@ -1,2 +1,2 @@
-# Strat
-"# Strat" 
+# bs
+bs
