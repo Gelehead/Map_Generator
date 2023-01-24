@@ -70,10 +70,27 @@ public class Main {
             System.out.println("  " + "· ".repeat(width+(adjust/2)) + " ");
         }
 
-        //Add rivers ( add fct to add terrain later )
-        public static void addRiver(byte lengthOfRiver){
+
+        //Add rivers
+        public static void addRiver(int lengthOfRiver){
             Random rand = new Random();
-            rand.nextInt(height)
+            byte yOfRiver = rand.nextInt(1,this.height);
+            // ---To Do--- pathfinding algo (Djovktra / A*(note: shortest path not necessary))
+            // to make the river go from a part of an edge to another  
+        }
+
+
+        // Add terrain
+        public static void addTerrain(int nbOfClusters, int rangeOfBigness){
+            Random random = new Random();
+
+            for (int i = 0; i<nbOfClusters; i++){
+                //choose random coordinates
+                byte y = random.nextInt(0,this.height);
+                byte x = random.nextInt(0,this.width);
+
+            }
+
         }
 
         // ---------- Array part ------------ (map)
