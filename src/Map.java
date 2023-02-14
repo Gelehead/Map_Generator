@@ -1,9 +1,9 @@
 import java.util.*;
 public class Map{
-    int height;
-    int width;
-    int nbOfRivers;
+    ArrayList<Tile> mostRecentCluster = new ArrayList<>();
+    int height, width, nbOfRivers;
     Tile[][] map;
+
     public Map(int height, int width){
         this.height = height;
         this.width = width;
@@ -11,31 +11,85 @@ public class Map{
         this.map = introMap((byte) 1, this.height, this.width);
     }
 
-        // first of 2 parts of overloading to introduce default settings to map sizing
-        // --Note-- Might be out of date with this version of the code
-    public Tile[][] introMap(byte difficulty, int height, int width){
-        return trueMap(difficulty, height, width);
-    }
-        // second part
-    public Tile[][] introMap(byte difficulty){
-        return trueMap(difficulty, 5, 10);
+
+
+
+// ------------- Tile manipulation ------------ //
+
+    // FIND A BETTER WAY TO DISTRIBUTE FUNCTIONS
+    //  getNeighbours being static isn t a good idea
+    public static Tile[] getNeighbours(Tile[][] map, Tile tile){
+        Tile[] listOfNeighbours = new Tile[4];
+        int[] neededValuesx = {0,-1,0,1};
+        int[] neededValuesy = {-1,0,1,0};
+        for (int i = 0; i < 4; i++) { 
+            listOfNeighbours[(i)] = map[tile.getPosx()+neededValuesx[i]][tile.getPosy()+neededValuesy[i]];
+        }
+        return listOfNeighbours;
     }
 
-    public Tile[][] trueMap(byte difficulty, int height, int width){
-        return createArray(height, width);
+
+
+    public void assignNeighbours(){
+        for (int i = 0; i < this.height; i++) {
+            for (int j = 0; j < this.width; j++) {
+                Tile currentTile = map[j][i];
+                // hauteur i
+                currentTile.setBotTile(i == 0 ? null : map[j][i-1]);
+                currentTile.setTopTile(i == height ? null : map[j][i+1]);
+
+                // largeur j 
+                currentTile.setLeftTile(j == 0 ? null : map[j-1][i]);
+                currentTile.setRightTile(j == width ? null : map[j+1][i]);
+            }
+        }
     }
 
-    //Create map in Terminal
-    public void makeMap(){
+
+
+
+
+    //Create cluster in memory
+    public void addCluster(){
+        ArrayList<Tile> cluster = new ArrayList<>(); // make the add mechanic in Terrain.addCluster() |ToDo|
+
         Random rand = new Random();
 
-        int clusterX = rand.nextInt(1,width-1); 
-        int clusterY = rand.nextInt(1,height);
+        int clusterX = rand.nextInt(0,width); 
+        int clusterY = rand.nextInt(0,height);
         // rangeOfBigness will have {int maxEstrangement, float Dispersion (0-1)}
-        float[] rangeOfBigness = {1f, 0.7f};
-        addCluster(clusterX, clusterY, rangeOfBigness);
+        float[] rangeOfBigness = {2f, 1f};
+        cluster = Terrain.addCluster(this.map, this.width, this.height, clusterX, clusterY, rangeOfBigness);
 
-    // -------------------------------------------------------------------------- //
+        // replace this with try catch or exceptions or idk how it works
+        // like try catch testpath(... , ...).getExists() != true
+        System.out.println(clusterY/2);
+        System.out.println(map[15][0].toString());
+        Tile testStart = map[0][clusterY/2];
+        Tile testEnd = map[width-1][clusterY/2];
+        //while (testPath(testStart,testEnd).getExists() == false){
+          //  int randomX = rand.nextInt(0,width+1); 
+            //int randomY = rand.nextInt(0,height+1);
+            //Terrain.deleteCluster(map, mostRecentCluster);
+            //Terrain.addCluster(this.map, this.width, this.height, randomX, randomY, rangeOfBigness);;
+        //}
+
+        this.mostRecentCluster = cluster;
+    }
+
+    //deletes the most recently creaeted Cluster of mountains
+    public void deleteMostRecentCluster(){
+        Terrain.deleteCluster(this.map, this.mostRecentCluster);
+    }
+
+
+
+
+
+// ------------------ Visual part ---------------- //
+
+    // Shows map in terminal
+    public void showMap() {
         int adjust = this.width > 9 ? this.width-9 : 0;
 
         String columnNumbers = "  ";
@@ -46,72 +100,33 @@ public class Map{
 
         for (int y = 0; y < this.height; y++){
             String text = "";
-            for (int x = 1; x < this.width; x++) {
+            for (int x = 0; x < this.width; x++) {
                 text += " " + this.map[x][y].repr();
             } 
-            System.out.println((char) (65+y) + text);
+            System.out.println((char) (65+y) + text + "·");
         }
         System.out.println("  " + "· ".repeat(this.width+(adjust/2)) + " ");
     }
 
 
-    //Add rivers
-    public void addRiver(int lengthOfRiver){
-        // Random rand = new Random();
-        // int[] start = {rand.nextInt(1,this.height), rand.nextInt(1,this.height)};
-        // ---To Do--- pathfinding algo (Djovktra / A*(note: shortest path not necessary))
-        // to make the river go from a part of an edge to another  
+
+
+
+
+
+
+// ----------------- Array part ------------------ //
+
+    public Tile[][] introMap(byte difficulty, int height, int width){
+        return createArray(height, width);
+        //do smth with dificulty
+    }
+    public Tile[][] introMap(byte difficulty){
+        return createArray(5, 10);
+        //do smth with dificulty
     }
 
-
-    // Add terrain
-    public void addTerrain(int nbOfClusters, float[] rangeOfBigness){
-        Random rand = new Random();
-
-        for (int i = 0; i<nbOfClusters; i++){
-            //choose random coordinates
-            addCluster(rand.nextInt(0,this.height), 
-               rand.nextInt(0,this.width), rangeOfBigness);
-        }
-    }
-
-    // generates "terrain"("^") randomly in a defined area 
-    public void addCluster(int xCoordinate, int yCoordinate, float[] rangeOfBigness){
-        addTerrain(xCoordinate, yCoordinate, "^");
-        Random random = new Random();
-
-        float threshold = 1 - rangeOfBigness[1];
-        int size = (int) rangeOfBigness[0];
-        int i = 0;
-
-        while (i < (2*size + 1)* (2*size + 1)) {
-            float proba = random.nextFloat(); 
-            int x = random.nextInt(-size,size + 1); // +1 is used bc in nextInt, the upperbound is excluded
-            int y = random.nextInt(-size,size + 1);
-            // | ToDo | Rework the threshold system
-            if (proba > threshold) {
-                System.out.println("x : " + x + "   y : " + y + "      size : " + size);
-                threshold += (proba - threshold) * (0.25 * Math.sqrt(x*x+y*y));
-                int xCo = ((xCoordinate + x) >= 0 && (xCoordinate + x) < this.width-1) ? xCoordinate + x : 360;
-                int yCo = ((yCoordinate + y) >= 0 && (yCoordinate + y) < this.height) ? yCoordinate + y : 360;
-                addTerrain(xCo, yCo, "^");
-            }
-            if ((x != 0 ) && (y != 0)){ i++; } // increment counter if mountain placed was not on (xCoordinates,yCoordinates)
-        }
-    }
-
-    public void addTerrain(int xCoordinate, int yCoordinate, String mapRepr){
-        if ((xCoordinate != 360) && (yCoordinate != 360)){
-            Terrain mountain = new Terrain(false, mapRepr);
-            this.map[xCoordinate][yCoordinate].setNextState(mountain);
-            this.map[xCoordinate][yCoordinate].setState(mountain);
-        }
-        else {System.out.println("Out Of Bounds");} // will be "OOB" from now
-    }
-
-    // ---------- Array part ------------ (map)
-
-    // Creates the 2 dimensions Tile arrays representing the map
+    // Creates the 2 dimensions Tile arrays representing the map in memory
     public static Tile[][] createArray(int height, int width){
         Tile[][] arr = new Tile[width][height];
         for (byte x = 0; x < width; x++){
@@ -119,27 +134,43 @@ public class Map{
                 arr[x][y] = new Tile(x, y, null, null);
             }
         }
+        
         return arr;
     }
 
-// --------------- Utilities ------------------ //
-    //Need to do Fisher-Yates algo smwhere
 
-    // Pathfinding 
-    public static int[] findPath(int[] start, int[] end) {
-        int[] a = {1,2};
-        return a;
+
+
+
+// ----------- Pathfinding Bridge ------------- \\
+
+    public Path testPath(Tile start, Tile end){
+        // return Pathfinding.findPath(map, start, end)
+        return Path.toPath(Pathfinding.findPath(this.map, this.map[4][4],this.map[15][4]));
     }
+
+    public double calcgScore(Tile node, Tile endNode){
+        // g(n)=g(n.parent)+cost(n.parent,n)
+        return Pathfinding.calcgScore(node, endNode);
+    }
+
+    public double calchScore(Tile node, Tile endNode){
+        //h(n)=c⋅max(∣n.x−goal.x∣,∣n.y−goal.y∣)
+        // actually went for the manhattan distance
+        return Pathfinding.calchScore(node, endNode);
+    }
+
+
 
 
 // ---------- "AI" generated Terrain ---------- //
     // rivers  - must come from a border of the map and go to another
+    // -- can go from a random number from a random border to another random number to a random perpendicular border
+    // -- the path generated will change based on the pathfinding algorithm used (choosed randomly from an array of algos)
+    // ┤ ╡ ╢ ╖ ╕ ╣ ║ ╗ ╝ ╜╞ ╟ ╛ ┐ └ ┴ ┬ ├ ─ ┼ ╞ ╟ ╚ ╔ ╩ ╦ ╠ ═ ╬ ╧ ╨ ╤ ╥ ╙ ╘ ╒ ╓ ╫ ╪ ┘ ┌ 
 
 
-    // mountains - come in a cluster of 3 or more, each adjacet with 2 or more
-
-
-    // ToString Override
+// ToString Override
     @Override
     public String toString() {
         String text = "";
@@ -152,7 +183,36 @@ public class Map{
         return text;
     }
 
+// getters - setters
+    public Tile[][] getMap() { return map; }
+
 }
 /* --------------------------------------------- */
 
 
+
+
+
+/*    EXEMPLES DE MAP
+
+Que faire dans ce cas la 
+(modifier le spawn d ennemis pourqu ils soient accessibles par le joueur)
+  0 1 2 3 4 5 6 7 8 9 
+A   ^
+B ^ ^
+C ^ ^
+D
+E
+  · · · · · · · · · ·
+
+---------------------------------------
+|     Bonne map pour un niveau
+
+  0 1 2 3 4 5 6 7 8 9 
+A               ^ ^  ·
+B                    ·
+C             ^   ^  ·
+D           ^ ^      ·
+E         ^ ^     ^  ·
+  · · · · · · · · · ·
+*/

@@ -11,11 +11,7 @@
 
 public class Main {
     public static void main(String[] args){
-        byte mapHeight = 5;
-        byte mapWidth = 10;
-
-        Map newMap = new Map(mapHeight, mapWidth);
-        newMap.makeMap();
+        Game.run();
     }
 }
 
