@@ -7,10 +7,10 @@ public class Game {
 
         Map newMap = new Map(mapHeight, mapWidth);
         newMap.addCluster();
-        //newMap.assignNeighbours();
+        newMap.assignNeighbours();
         newMap.showMap();
-        newMap.deleteMostRecentCluster();
-        newMap.showMap();
+        Tile[][] map = newMap.getMap();
+        System.out.println(map[15][2].getLeftTile().toString());
     }
 
     public static void pathTest(){

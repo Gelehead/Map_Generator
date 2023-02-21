@@ -31,12 +31,13 @@ public class Map{
 
 
     public void assignNeighbours(){
-        for (int i = 0; i < this.height; i++) {
-            for (int j = 0; j < this.width; j++) {
+        for (int i = 0; i < this.height-1; i++) {
+            for (int j = 0; j < this.width-1; j++) {
                 Tile currentTile = map[j][i];
                 // hauteur i
-                currentTile.setBotTile(i == 0 ? null : map[j][i-1]);
-                currentTile.setTopTile(i == height ? null : map[j][i+1]);
+                currentTile.setTopTile(i == 0 ? null : map[j][i-1]);
+                currentTile.setBotTile(i == height ? null : map[j][i+1]);
+                // note : topTile is the tile with y index -1 because y increments the "lower" we go
 
                 // largeur j 
                 currentTile.setLeftTile(j == 0 ? null : map[j-1][i]);
@@ -61,18 +62,19 @@ public class Map{
         float[] rangeOfBigness = {2f, 1f};
         cluster = Terrain.addCluster(this.map, this.width, this.height, clusterX, clusterY, rangeOfBigness);
 
+        // ---- put this as a comm to make code work
         // replace this with try catch or exceptions or idk how it works
         // like try catch testpath(... , ...).getExists() != true
         System.out.println(clusterY/2);
         System.out.println(map[15][0].toString());
         Tile testStart = map[0][clusterY/2];
         Tile testEnd = map[width-1][clusterY/2];
-        //while (testPath(testStart,testEnd).getExists() == false){
-          //  int randomX = rand.nextInt(0,width+1); 
-            //int randomY = rand.nextInt(0,height+1);
-            //Terrain.deleteCluster(map, mostRecentCluster);
-            //Terrain.addCluster(this.map, this.width, this.height, randomX, randomY, rangeOfBigness);;
-        //}
+        while (testPath(testStart,testEnd).getExists() == false){
+            int randomX = rand.nextInt(0,width+1); 
+            int randomY = rand.nextInt(0,height+1);
+            Terrain.deleteCluster(map, mostRecentCluster);
+            Terrain.addCluster(this.map, this.width, this.height, randomX, randomY, rangeOfBigness);
+        }
 
         this.mostRecentCluster = cluster;
     }
@@ -158,6 +160,10 @@ public class Map{
         //h(n)=c⋅max(∣n.x−goal.x∣,∣n.y−goal.y∣)
         // actually went for the manhattan distance
         return Pathfinding.calchScore(node, endNode);
+    }
+
+    public Tile getBestNeighbour(Tile tile){
+        
     }
 
 

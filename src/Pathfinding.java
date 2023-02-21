@@ -6,20 +6,24 @@ public class Pathfinding {
     ArrayList<Tile> closedTiles = new ArrayList<>();
     ArrayList<Tile> openTiles = new ArrayList<>();
     Tile[][] table;
+    private Path path = new Path();
 
     
     static ArrayList<Tile> findPath(Tile[][] table ,Tile source, Tile end){
-        ArrayList<Tile> openNodes = new ArrayList<>();
-        if (source.equals(end)) {
-            openNodes.add(source);
-            return openNodes;
-        }
-        explore(table, source, end, source);
-        // missing some things
-        return openNodes;
+        return explore(table, source, end, source);
     }
 
-    public static void explore(Tile[][] table, Tile tile, Tile endTile, Tile source){
+    public static ArrayList<Tile> explore(Tile[][] table, Tile tile, Tile endTile, Tile source){
+        if (true){
+            Tile bestTile = table.getBestNeighbour(tile);
+            bestTile
+        }
+        
+        
+        
+        
+        
+        
         // array would be [bot,top,left,right]
         double[] nodefScores = new double[4];
         nodefScores[0] = 
