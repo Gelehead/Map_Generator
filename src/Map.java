@@ -1,14 +1,16 @@
 import java.util.*;
+// good to know : height is width and width is height
 public class Map{
     ArrayList<Tile> mostRecentCluster = new ArrayList<>();
-    int height, width, nbOfRivers;
+    private int height, width, nbOfRivers;
     Tile[][] map;
 
     public Map(int height, int width){
         this.height = height;
         this.width = width;
         this.nbOfRivers = 0;
-        this.map = introMap((byte) 1, this.height, this.width);
+        this.map = createArray(this.height, this.width);
+        init();
     }
 
 
@@ -16,39 +18,53 @@ public class Map{
 
 // ------------- Tile manipulation ------------ //
 
-    // FIND A BETTER WAY TO DISTRIBUTE FUNCTIONS
-    //  getNeighbours being static isn t a good idea
-    public static Tile[] getNeighbours(Tile[][] map, Tile tile){
+public static Tile[] getNeighbours(Map map, Tile tile){
         Tile[] listOfNeighbours = new Tile[4];
-        int[] neededValuesx = {0,-1,0,1};
-        int[] neededValuesy = {-1,0,1,0};
+        int[] berengena = {0,1,0,-1};
         for (int i = 0; i < 4; i++) { 
-            listOfNeighbours[(i)] = map[tile.getPosx()+neededValuesx[i]][tile.getPosy()+neededValuesy[i]];
+            int berengenaX = berengena[(i+3)%4] + tile.getPosx();
+            int berengenaY = berengena[i] + tile.getPosy();
+            if (((berengenaX <= map.getWidth()-1) && ( berengenaX >= 0)) && ((berengenaY <= (map.getHeight()-1)) && (berengenaY >= 0))){
+                listOfNeighbours[i] = map.getMap()[berengenaX][berengenaY];
+            }
+            else{
+                listOfNeighbours[i] = null;
+            }
         }
         return listOfNeighbours;
     }
 
+public static Tile[] getAllNeighbours(Map map, Tile tile){
+    System.out.println(tile);
+    Tile[] listOfNeighbours = new Tile[8];
+        for (int i = 0; i < 8; i++) { 
+            int[] co = {0,1,1,1,0,-1,-1,-1};
+            int x = co[i] + tile.getPosx();
+            int y = co[(i+6)%8] + tile.getPosy();
+            // Extremely ugly 
+            if (((x <= map.getWidth()-1) && ( x >= 0)) && ((y <= (map.getHeight()-1)) && (y >= 0))){
 
-
-    public void assignNeighbours(){
-        for (int i = 0; i < this.height-1; i++) {
-            for (int j = 0; j < this.width-1; j++) {
-                Tile currentTile = map[j][i];
-                // hauteur i
-                currentTile.setTopTile(i == 0 ? null : map[j][i-1]);
-                currentTile.setBotTile(i == height ? null : map[j][i+1]);
-                // note : topTile is the tile with y index -1 because y increments the "lower" we go
-
-                // largeur j 
-                currentTile.setLeftTile(j == 0 ? null : map[j-1][i]);
-                currentTile.setRightTile(j == width ? null : map[j+1][i]);
+                listOfNeighbours[i] = map.getMap()[tile.getPosx() + co[i]][tile.getPosy() + co[(i+6)%8]];
+                System.out.println(tile);
+                System.out.println("...");
+                System.out.println(listOfNeighbours[i]);
             }
+            else{
+                listOfNeighbours[i] = null;
+                System.out.println("null");
+            }
+            //System.out.println(berengena[i] + " + " + berengenaX);
+            //System.out.println(berengena[(i+6)%8] + " + " + berengenaY);
         }
-    }
+        /*
+        for (Tile tile2 : listOfNeighbours) {
+            System.out.println(tile2);
+        }
+        */
+        return listOfNeighbours;
+}
 
-
-
-
+    
 
     //Create cluster in memory
     public void addCluster(){
@@ -61,21 +77,6 @@ public class Map{
         // rangeOfBigness will have {int maxEstrangement, float Dispersion (0-1)}
         float[] rangeOfBigness = {2f, 1f};
         cluster = Terrain.addCluster(this.map, this.width, this.height, clusterX, clusterY, rangeOfBigness);
-
-        // ---- put this as a comm to make code work
-        // replace this with try catch or exceptions or idk how it works
-        // like try catch testpath(... , ...).getExists() != true
-        System.out.println(clusterY/2);
-        System.out.println(map[15][0].toString());
-        Tile testStart = map[0][clusterY/2];
-        Tile testEnd = map[width-1][clusterY/2];
-        while (testPath(testStart,testEnd).getExists() == false){
-            int randomX = rand.nextInt(0,width+1); 
-            int randomY = rand.nextInt(0,height+1);
-            Terrain.deleteCluster(map, mostRecentCluster);
-            Terrain.addCluster(this.map, this.width, this.height, randomX, randomY, rangeOfBigness);
-        }
-
         this.mostRecentCluster = cluster;
     }
 
@@ -119,15 +120,6 @@ public class Map{
 
 // ----------------- Array part ------------------ //
 
-    public Tile[][] introMap(byte difficulty, int height, int width){
-        return createArray(height, width);
-        //do smth with dificulty
-    }
-    public Tile[][] introMap(byte difficulty){
-        return createArray(5, 10);
-        //do smth with dificulty
-    }
-
     // Creates the 2 dimensions Tile arrays representing the map in memory
     public static Tile[][] createArray(int height, int width){
         Tile[][] arr = new Tile[width][height];
@@ -136,37 +128,18 @@ public class Map{
                 arr[x][y] = new Tile(x, y, null, null);
             }
         }
-        
         return arr;
     }
 
-
-
-
-
-// ----------- Pathfinding Bridge ------------- \\
-
-    public Path testPath(Tile start, Tile end){
-        // return Pathfinding.findPath(map, start, end)
-        return Path.toPath(Pathfinding.findPath(this.map, this.map[4][4],this.map[15][4]));
+    public void init(){
+        for (int height = 0; height < this.width; height++) {
+            for (int width = 0; width < this.height ; width++) {
+                //really ineficient : must create a TileState object for each tile of the array 
+                // ■
+                map[height][width].setState(new TileState(" ", null, 1, 0));
+            }
+        }
     }
-
-    public double calcgScore(Tile node, Tile endNode){
-        // g(n)=g(n.parent)+cost(n.parent,n)
-        return Pathfinding.calcgScore(node, endNode);
-    }
-
-    public double calchScore(Tile node, Tile endNode){
-        //h(n)=c⋅max(∣n.x−goal.x∣,∣n.y−goal.y∣)
-        // actually went for the manhattan distance
-        return Pathfinding.calchScore(node, endNode);
-    }
-
-    public Tile getBestNeighbour(Tile tile){
-        
-    }
-
-
 
 
 // ---------- "AI" generated Terrain ---------- //
@@ -190,7 +163,21 @@ public class Map{
     }
 
 // getters - setters
-    public Tile[][] getMap() { return map; }
+    public Tile[][] getMap() { 
+        return map; 
+    }
+    public int getHeight() {
+        return height;
+    }
+    public ArrayList<Tile> getMostRecentCluster() {
+        return mostRecentCluster;
+    }
+    public int getNbOfRivers() {
+        return nbOfRivers;
+    }
+    public int getWidth() {
+        return width;
+    }
 
 }
 /* --------------------------------------------- */
@@ -204,11 +191,11 @@ public class Map{
 Que faire dans ce cas la 
 (modifier le spawn d ennemis pourqu ils soient accessibles par le joueur)
   0 1 2 3 4 5 6 7 8 9 
-A   ^
-B ^ ^
-C ^ ^
-D
-E
+A   ^                ·
+B ^ ^                ·
+C ^ ^                ·
+D                    ·
+E                    ·
   · · · · · · · · · ·
 
 ---------------------------------------

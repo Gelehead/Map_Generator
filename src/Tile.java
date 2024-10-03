@@ -3,20 +3,22 @@ public class Tile {
     private int posx; 
     private int posy;
     // state is supposed to contain an ennemy / terrain / traps / nothing(null)(which means that it is walkable)
-    Object state, nextState;
+    TileState state, nextState;
 
     // neigbours ( currently being reworked )
-    private Tile topTile, botTile, rightTile, leftTile;
+    Tile topTile, botTile, rightTile, leftTile;
+    Tile[] neighbours = new Tile[4];
+    
 
-    public Tile(int posx , int posy, Object state, Object nextState){
+    public Tile(int posx , int posy, TileState state, TileState nextState){
         this.posx = posx;
         this.posy = posy;
         this.state = state;
         this.nextState = nextState;
     }
 
-    public void setState(Object newState){ this.state = newState; }
-    public void setNextState(Object newNextState){ this.nextState = newNextState; };
+    public void setState(TileState newState){ this.state = newState; }
+    public void setNextState(TileState newNextState){ this.nextState = newNextState; };
 
     //ajouter .toString() a this.state et this.nextState
     @Override
@@ -44,6 +46,7 @@ public class Tile {
     // getters
     public int getPosx() { return posx; }
     public int getPosy() { return posy; }
+    public TileState getState() {return state;}
     public Tile getBotTile() {return botTile;}
     public Tile getLeftTile() {return leftTile;}
     public Tile getRightTile() {return rightTile;}

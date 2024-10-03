@@ -1,4 +1,7 @@
 import java.util.Random;
+
+import enums.tileStatus;
+
 import java.util.ArrayList;
 
 public class Terrain{
@@ -15,7 +18,7 @@ public class Terrain{
     public void addRiver(int lengthOfRiver){
         // Random rand = new Random();
         // int[] start = {rand.nextInt(1,this.height), rand.nextInt(1,this.height)};
-        // ---To Do--- pathfinding algo (Djovktra / A*(note: shortest path not necessary))
+        // ---To Do--- pathfinding algo (Dijkstra / A*(note: shortest path not necessary))
         // to make the river go from a part of an edge to another  
     }
 
@@ -63,11 +66,12 @@ public class Terrain{
 
     public static void addTerrain(Tile[][] map, int xCoordinate, int yCoordinate, String mapRepr){
         if ((xCoordinate != 360) && (yCoordinate != 360)){
-            Terrain mountain = new Terrain(false, mapRepr);
+            TileState mountain = new TileState(mapRepr, tileStatus.OBSTACLE, 999, -1);
+            //Terrain mountain = new Terrain(false, mapRepr);
             map[xCoordinate][yCoordinate].setNextState(mountain);
             map[xCoordinate][yCoordinate].setState(mountain);
         }
-        else {System.out.println("Out Of Bounds");} // will be "OOB" from now
+        //else {System.out.println("Out Of Bounds");} // will be "OOB" from now
     }
 
     public static void deleteCluster(Tile[][] map, ArrayList<Tile> recentCluster){
